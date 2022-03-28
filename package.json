@@ -1,7 +1,7 @@
 {
   "name": "jsonpath-tmf-query",
   "version": "0.1.0",
-  "description": "",
+  "description": "This library aims to provide a simple wrapper around jsonpath, to ease the implementation of TMF630 JSONPath specification as outlined by the TM Forum [here](https://projects.tmforum.org/wiki/pages/viewpage.action?spaceKey=PUB&title=TMF630+REST+API+Design+Guidelines+v4.0.1)",
   "main": "dist/JSONPathQuery.js",
   "scripts": {
     "prepublish": "tsc",
@@ -36,5 +36,19 @@
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NathanBabinall/jsonpath-tmf-query.git"
+  },
+  "keywords": [
+    "json",
+    "jsonpath",
+    "tmf",
+    "tm forum"
+  ],
+  "bugs": {
+    "url": "https://github.com/NathanBabinall/jsonpath-tmf-query/issues"
+  },
+  "homepage": "https://github.com/NathanBabinall/jsonpath-tmf-query#readme"
 }
