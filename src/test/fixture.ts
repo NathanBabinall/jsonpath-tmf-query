@@ -137,6 +137,18 @@ export const arrayDocument = [{
       author: 'Mr Redfin Tekram',
       text: 'Issue has been resolved, the service has been restored',
     },
+    {
+      id: '4',
+      date: '2018-05-02T00:00',
+      author: 'Mr Redfin Tekram',
+      text: 'Issue has been resolved, the service has been restored',
+    },
+    {
+      id: '5',
+      date: '2018-05-01T00:00',
+      author: 'Mr Erika Xavy',
+      text: "Information has been received, we're working on the resolution",
+    },
   ],
   attachment: [
     {

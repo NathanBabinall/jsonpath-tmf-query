@@ -1,5 +1,5 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-case-declarations */
-/*  */
 import jp from 'jsonpath';
 import get from 'lodash.get';
 import set from 'lodash.set';
@@ -32,12 +32,47 @@ const sortOperations = (ops: Operation[]):Operation[] => ops.sort((opA, opB) => 
   return getOpIndex(opA) - getOpIndex(opB);
 });
 
+/**
+ * Depth first removal of undefined and empty objects
+ */
+const removeEmpty = (obj: any) => {
+  Object.keys(obj).forEach((key) => {
+    // Get this value and its type
+    const value = obj[key];
+    const type = typeof value;
+    if (type === 'object') {
+      // Recurse
+      removeEmpty(value);
+      // If it's an object without keys, delete
+      if (!Object.keys(value).length) {
+        delete obj[key];
+      }
+      // If its an array, iterate through for non existing values, and splice them
+      if (Array.isArray(value)) {
+        for (let i = value.length - 1; i >= 0; i -= 1) {
+          if (!value[i]) {
+            value.splice(i, 1);
+          }
+        }
+      }
+    } else if (type === 'undefined') {
+      // Undefined, remove it
+      delete obj[key];
+    }
+  });
+};
+
 export default class JSONPathQuery {
   static query(document: any, operations: Operation[]): any {
     const rootIsArray = Array.isArray(document);
+    const mutatedDocument = JSON.parse(JSON.stringify(document));
     const hasFields = operations.some((operation) => operation.op === 'fields');
     const hasFilter = operations.some((operation) => operation.op === 'filter');
     let hasSort = operations.some((operation) => operation.op === 'sort');
+    let newDocument: {} | [{}];
+    let filteredDocument: {} | [{}] = rootIsArray ? [] : {};
+    if (hasFilter || rootIsArray) newDocument = [];
+    else newDocument = {};
     const pathPrefix = rootIsArray || hasFilter ? '$[*].' : '$.';
     if (hasFields) {
       operations.push({
@@ -49,20 +84,22 @@ export default class JSONPathQuery {
         path: `${pathPrefix}href`,
       });
     }
-    let filteredDocument: {} | [{}] = rootIsArray ? [] : {};
-    let newDocument: {} | [{}];
-    if (hasFilter || rootIsArray) newDocument = [];
-    else newDocument = {};
+
     const sortedOperations = sortOperations(operations);
+
     sortedOperations.forEach((operation, index) => {
       hasSort = operations.slice(index).some((remainingOp) => remainingOp.op === 'sort');
       let paths: jp.PathComponent[][];
-      if (hasSort) paths = jp.paths(document, operation.path);
+      if (operation.path.startsWith('$') === false && operation.path !== 'none') {
+        if (rootIsArray) operation.path = `$${operation.path}`;
+        else operation.path = `$.${operation.path}`;
+      }
+      if (hasSort) paths = jp.paths(mutatedDocument, operation.path);
       else if (hasFilter) paths = jp.paths(filteredDocument, operation.path);
-      else paths = jp.paths(document, operation.path);
+      else paths = jp.paths(mutatedDocument, operation.path);
       switch (operation.op) {
         case 'filter':
-          filteredDocument = jp.query(document, operation.path);
+          filteredDocument = jp.query(mutatedDocument, operation.path);
           if (operation.limit && operation.offset) {
             filteredDocument = (filteredDocument as any[]).slice(operation.offset, operation.offset + operation.limit);
           } else if (operation.limit) {
@@ -82,7 +119,7 @@ export default class JSONPathQuery {
           } else {
             paths.forEach((_path) => {
               const path = _path.filter((p) => p !== '$');
-              const element = get(document, path);
+              const element = get(mutatedDocument, path);
               set(newDocument, path, element);
             });
           }
@@ -92,8 +129,7 @@ export default class JSONPathQuery {
           const sortParam = jsonPathQuery[jsonPathQuery.length - 1].expression.value;
           jsonPathQuery = jsonPathQuery.slice(0, -2);
           const stringPath = jp.stringify(jsonPathQuery);
-          const arrayOfNodes = jp.nodes(document, stringPath);
-
+          const arrayOfNodes = jp.nodes(mutatedDocument, stringPath);
           arrayOfNodes[0].value.sort((valueA: any, valueB: any) => {
             if (operation.order === 'asc') {
               if (valueA[`${sortParam}`] < valueB[`${sortParam}`]) { return -1; }
@@ -109,6 +145,8 @@ export default class JSONPathQuery {
           break;
       }
     });
+    if (hasSort && hasFields === false && hasFilter === false) return mutatedDocument;
+    removeEmpty(newDocument);
     return newDocument;
   }
 }

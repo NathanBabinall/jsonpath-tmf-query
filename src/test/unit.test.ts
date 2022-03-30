@@ -26,7 +26,7 @@ suite('TM Forum Examples - Fields', () => {
     const query: Operation[] = [
       {
         op: 'fields',
-        path: '$[*].channel.name',
+        path: '[*].channel.name',
       },
     ];
     const expected = [{
@@ -64,6 +64,45 @@ suite('TM Forum Examples - Fields', () => {
       }],
     };
     const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('Return notes for each object where note author=="Mr Redfin Tekram" + root id and href', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: "[*].note[?(@.author=='Mr Redfin Tekram')]",
+      },
+    ];
+    const expected = [{
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      note: [{
+        id: '3',
+        date: '2018-05-02T00:00',
+        author: 'Mr Redfin Tekram',
+        text: 'Issue has been resolved, the service has been restored',
+      }],
+    }, {
+      id: '6000',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+      note: [
+        {
+          id: '3',
+          date: '2018-05-02T00:00',
+          author: 'Mr Redfin Tekram',
+          text: 'Issue has been resolved, the service has been restored',
+        },
+        {
+          id: '4',
+          date: '2018-05-02T00:00',
+          author: 'Mr Redfin Tekram',
+          text: 'Issue has been resolved, the service has been restored',
+        },
+      ],
+    }];
+    const result = JSONPathQuery.query(arrayDocument, query);
+    // console.log(JSON.stringify(result, null, 2));
     expect(result).to.eql(expected);
   });
 
@@ -115,6 +154,63 @@ suite('TM Forum Examples - Fields', () => {
     expect(result).to.eql(expected);
   });
 
+  test('Return id, href, name, and notes of all objects in collection', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: "[*].relatedEntity[*]['id','name','@referredType']",
+      },
+    ];
+    const expected = [{
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      relatedEntity: [
+        {
+          id: '3472',
+          name: 'November Bill',
+          '@referredType': 'CustomerBill',
+        },
+        {
+          id: '3473',
+          name: 'December Bill',
+          '@referredType': 'CustomerBill',
+        },
+      ],
+    }, {
+      id: '6000',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+      relatedEntity: [
+        {
+          id: '3472',
+          name: 'November Bill',
+          '@referredType': 'CustomerBill',
+        },
+        {
+          id: '3473',
+          name: 'December Bill',
+          '@referredType': 'CustomerBill',
+        },
+      ],
+    }];
+    const result = JSONPathQuery.query(arrayDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('return id and href of single root object when field path is none', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: 'doesNotExist',
+      },
+    ];
+    const expected = {
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+    };
+    const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
   test('return id and href of all root objects when fields = none', () => {
     const query: Operation[] = [
       {
@@ -130,6 +226,21 @@ suite('TM Forum Examples - Fields', () => {
       href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
     }];
     const result = JSONPathQuery.query(arrayDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('return id and href of root object when field path does not exist', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: 'doesNotExist',
+      },
+    ];
+    const expected = {
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+    };
+    const result = JSONPathQuery.query(simpleDocument, query);
     expect(result).to.eql(expected);
   });
 });
@@ -180,7 +291,7 @@ suite('TM Forum Examples - Filter', () => {
     const query: Operation[] = [
       {
         op: 'filter',
-        path: "$.statusChange[?(@.status!='Pending')]",
+        path: "statusChange[?(@.status!='Pending')]",
       },
     ];
     const expected = [
@@ -215,7 +326,7 @@ suite('TM Forum Examples - Filter', () => {
     const query: Operation[] = [
       {
         op: 'filter',
-        path: "$.attachment[?(@.size==300 && @.sizeUnit=='KB')]",
+        path: "attachment[?(@.size==300 && @.sizeUnit=='KB')]",
       },
     ];
     const expected = [
@@ -298,6 +409,63 @@ suite('TM Forum Examples - Filter', () => {
       },
     ];
     const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+});
+
+suite('TM Forum Examples - Sort', () => {
+  test('Sort and return notes id in ascending order- should not change', () => {
+    const query: Operation[] = [
+      {
+        op: 'sort',
+        path: 'note[*].id',
+        order: 'asc',
+      },
+    ];
+    const expected = simpleDocument;
+    const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('Sort and return notes in descending order - notes will reverse', () => {
+    const query: Operation[] = [
+      {
+        op: 'sort',
+        path: 'note[*].id',
+        order: 'desc',
+      },
+    ];
+    const reversedNotes = [...simpleDocument.note].reverse();
+    const expected = { ...simpleDocument, note: reversedNotes.slice() };
+    const result = JSONPathQuery.query(simpleDocument, query);
+
+    expect(result).to.eql(expected);
+  });
+
+  test('Sort and return notes in descending order - notes will reverse', () => {
+    const query: Operation[] = [
+      {
+        op: 'sort',
+        path: '[*].id',
+        order: 'asc',
+      },
+    ];
+    const expected = arrayDocument;
+    const result = JSONPathQuery.query(arrayDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('Sort and return notes in descending order - notes will reverse', () => {
+    const query: Operation[] = [
+      {
+        op: 'sort',
+        path: '[*].id',
+        order: 'desc',
+      },
+    ];
+    const expected = [...arrayDocument].reverse();
+    const result = JSONPathQuery.query(arrayDocument, query);
+
     expect(result).to.eql(expected);
   });
 });
