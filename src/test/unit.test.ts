@@ -1,6 +1,6 @@
 import { suite, test } from 'mocha';
 import { expect } from 'chai';
-import JSONPathQuery, { Operation } from '../JSONPathQuery';
+import JSONPathQuery, { Operation, checkValidJsonPath } from '../JSONPathQuery';
 import { simpleDocument, arrayDocument } from './fixture';
 
 suite('TM Forum Examples - Fields', () => {
@@ -151,6 +151,28 @@ suite('TM Forum Examples - Fields', () => {
       ],
     };
     const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('Return id, href, name, status for each object in collection', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: "[*]['name','status']",
+      },
+    ];
+    const expected = [{
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      name: 'Compliant over last bill',
+      status: 'Resolved',
+    }, {
+      id: '6000',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+      name: 'Compliant over last bill',
+      status: 'Resolved',
+    }];
+    const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
 
@@ -442,7 +464,7 @@ suite('TM Forum Examples - Sort', () => {
     expect(result).to.eql(expected);
   });
 
-  test('Sort and return notes in descending order - notes will reverse', () => {
+  test('Sort and return collection based on id in ascending order - no change', () => {
     const query: Operation[] = [
       {
         op: 'sort',
@@ -455,7 +477,7 @@ suite('TM Forum Examples - Sort', () => {
     expect(result).to.eql(expected);
   });
 
-  test('Sort and return notes in descending order - notes will reverse', () => {
+  test('Sort and return collection based on id in descending order - collection will reverse', () => {
     const query: Operation[] = [
       {
         op: 'sort',
@@ -544,5 +566,49 @@ suite('TM Forum Examples - Filter + Fields + Sort', () => {
     ];
     const result = JSONPathQuery.query(simpleDocument, query);
     expect(result).to.eql(expected);
+  });
+});
+
+suite('Test jsonpath expression validation', () => {
+  test('jsonpath string validity - note[?(@.id<=4)]', () => {
+    const jsonpathExpression = 'note[?(@.id<=4)]';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test("jsonpath string validity - $[*]['id','text']", () => {
+    const jsonpathExpression = "$[*]['id','text']";
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test('jsonpath string validity - note[*].author', () => {
+    const jsonpathExpression = 'note[*].author';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test('jsonpath string validity - [*].id', () => {
+    const jsonpathExpression = '[*].id';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test('jsonpath string validity - attachment[?(!@.size)]', () => {
+    const jsonpathExpression = 'attachment[?(!@.size)]';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test('jsonpath string validity - channel.name', () => {
+    const jsonpathExpression = 'channel.name';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(true);
+  });
+
+  test('Invalid jsonpath string - id,href (e.g fields query)', () => {
+    const jsonpathExpression = 'id,href';
+    const valid = checkValidJsonPath(jsonpathExpression);
+    expect(valid).to.eql(false);
   });
 });

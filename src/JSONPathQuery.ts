@@ -62,6 +62,20 @@ const removeEmpty = (obj: any) => {
   });
 };
 
+export const checkValidJsonPath = (jsonpathExpression: string) => {
+  try {
+    jp.parse(jsonpathExpression);
+    return true;
+  } catch (_e) {
+    try {
+      jp.parse(`$${jsonpathExpression}`);
+      return true;
+    } catch (_e) {
+      return false;
+    }
+  }
+};
+
 export default class JSONPathQuery {
   static query(document: any, operations: Operation[]): any {
     const rootIsArray = Array.isArray(document);
