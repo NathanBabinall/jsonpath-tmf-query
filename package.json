@@ -1,6 +1,6 @@
 {
   "name": "jsonpath-tmf-query",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "This library aims to provide a simple wrapper around jsonpath, to ease the implementation of TMF630 JSONPath specification as outlined by the TM Forum [here](https://projects.tmforum.org/wiki/pages/viewpage.action?spaceKey=PUB&title=TMF630+REST+API+Design+Guidelines+v4.0.1)",
   "main": "dist/JSONPathQuery.js",
   "scripts": {

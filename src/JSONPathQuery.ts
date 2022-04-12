@@ -62,7 +62,8 @@ const removeEmpty = (obj: any) => {
   });
 };
 
-export const checkValidJsonPath = (jsonpathExpression: string) => {
+export const checkValidJsonPath = (jsonpathExpression: any) => {
+  if (typeof jsonpathExpression !== 'string') return false;
   try {
     jp.parse(jsonpathExpression);
     return true;
