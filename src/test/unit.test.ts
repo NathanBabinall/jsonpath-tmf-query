@@ -29,19 +29,22 @@ suite('TM Forum Examples - Fields', () => {
         path: '[*].channel.name',
       },
     ];
-    const expected = [{
-      id: '3180',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-      channel: {
-        name: 'Self Service',
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+        channel: {
+          name: 'Self Service',
+        },
       },
-    }, {
-      id: '6000',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
-      channel: {
-        name: 'Self Service',
+      {
+        id: '6000',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+        channel: {
+          name: 'Self Service',
+        },
       },
-    }];
+    ];
     const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
@@ -56,12 +59,14 @@ suite('TM Forum Examples - Fields', () => {
     const expected = {
       id: '3180',
       href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-      note: [{
-        id: '1',
-        date: '2018-05-01T00:00',
-        author: 'Mr John Wils',
-        text: 'Missing necessary information from the customer',
-      }],
+      note: [
+        {
+          id: '1',
+          date: '2018-05-01T00:00',
+          author: 'Mr John Wils',
+          text: 'Missing necessary information from the customer',
+        },
+      ],
     };
     const result = JSONPathQuery.query(simpleDocument, query);
     expect(result).to.eql(expected);
@@ -74,35 +79,39 @@ suite('TM Forum Examples - Fields', () => {
         path: "[*].note[?(@.author=='Mr Redfin Tekram')]",
       },
     ];
-    const expected = [{
-      id: '3180',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-      note: [{
-        id: '3',
-        date: '2018-05-02T00:00',
-        author: 'Mr Redfin Tekram',
-        text: 'Issue has been resolved, the service has been restored',
-      }],
-    }, {
-      id: '6000',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
-      note: [
-        {
-          id: '3',
-          date: '2018-05-02T00:00',
-          author: 'Mr Redfin Tekram',
-          text: 'Issue has been resolved, the service has been restored',
-        },
-        {
-          id: '4',
-          date: '2018-05-02T00:00',
-          author: 'Mr Redfin Tekram',
-          text: 'Issue has been resolved, the service has been restored',
-        },
-      ],
-    }];
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+        note: [
+          {
+            id: '3',
+            date: '2018-05-02T00:00',
+            author: 'Mr Redfin Tekram',
+            text: 'Issue has been resolved, the service has been restored',
+          },
+        ],
+      },
+      {
+        id: '6000',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+        note: [
+          {
+            id: '3',
+            date: '2018-05-02T00:00',
+            author: 'Mr Redfin Tekram',
+            text: 'Issue has been resolved, the service has been restored',
+          },
+          {
+            id: '4',
+            date: '2018-05-02T00:00',
+            author: 'Mr Redfin Tekram',
+            text: 'Issue has been resolved, the service has been restored',
+          },
+        ],
+      },
+    ];
     const result = JSONPathQuery.query(arrayDocument, query);
-    // console.log(JSON.stringify(result, null, 2));
     expect(result).to.eql(expected);
   });
 
@@ -110,7 +119,7 @@ suite('TM Forum Examples - Fields', () => {
     const query: Operation[] = [
       {
         op: 'fields',
-        path: "$['id','href','name','note']",
+        path: 'id,href,name,note',
       },
     ];
     const expected = {
@@ -158,20 +167,23 @@ suite('TM Forum Examples - Fields', () => {
     const query: Operation[] = [
       {
         op: 'fields',
-        path: "[*]['name','status']",
+        path: '[*][name,status]',
       },
     ];
-    const expected = [{
-      id: '3180',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-      name: 'Compliant over last bill',
-      status: 'Resolved',
-    }, {
-      id: '6000',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
-      name: 'Compliant over last bill',
-      status: 'Resolved',
-    }];
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+        name: 'Compliant over last bill',
+        status: 'Resolved',
+      },
+      {
+        id: '6000',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+        name: 'Compliant over last bill',
+        status: 'Resolved',
+      },
+    ];
     const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
@@ -180,40 +192,43 @@ suite('TM Forum Examples - Fields', () => {
     const query: Operation[] = [
       {
         op: 'fields',
-        path: "[*].relatedEntity[*]['id','name','@referredType']",
+        path: '[*].relatedEntity[*][id,name,`@referredType]',
       },
     ];
-    const expected = [{
-      id: '3180',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-      relatedEntity: [
-        {
-          id: '3472',
-          name: 'November Bill',
-          '@referredType': 'CustomerBill',
-        },
-        {
-          id: '3473',
-          name: 'December Bill',
-          '@referredType': 'CustomerBill',
-        },
-      ],
-    }, {
-      id: '6000',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
-      relatedEntity: [
-        {
-          id: '3472',
-          name: 'November Bill',
-          '@referredType': 'CustomerBill',
-        },
-        {
-          id: '3473',
-          name: 'December Bill',
-          '@referredType': 'CustomerBill',
-        },
-      ],
-    }];
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+        relatedEntity: [
+          {
+            id: '3472',
+            name: 'November Bill',
+            '@referredType': 'CustomerBill',
+          },
+          {
+            id: '3473',
+            name: 'December Bill',
+            '@referredType': 'CustomerBill',
+          },
+        ],
+      },
+      {
+        id: '6000',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+        relatedEntity: [
+          {
+            id: '3474',
+            name: 'November Bill',
+            '@referredType': 'CustomerBill',
+          },
+          {
+            id: '3475',
+            name: 'December Bill',
+            '@referredType': 'CustomerBill',
+          },
+        ],
+      },
+    ];
     const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
@@ -240,13 +255,16 @@ suite('TM Forum Examples - Fields', () => {
         path: 'none',
       },
     ];
-    const expected = [{
-      id: '3180',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
-    }, {
-      id: '6000',
-      href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
-    }];
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      },
+      {
+        id: '6000',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/6000',
+      },
+    ];
     const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
@@ -263,6 +281,82 @@ suite('TM Forum Examples - Fields', () => {
       href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
     };
     const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('Array multiple index selection', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: 'note[0,2,4,5]',
+      },
+    ];
+    const expected = {
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      note: [
+        {
+          id: '1',
+          date: '2018-05-01T00:00',
+          author: 'Mr John Wils',
+          text: 'Missing necessary information from the customer',
+        },
+        {
+          id: '3',
+          date: '2018-05-02T00:00',
+          author: 'Mr Redfin Tekram',
+          text: 'Issue has been resolved, the service has been restored',
+        },
+        {
+          id: '5',
+          date: '2018-05-01T00:00',
+          author: 'Mr Erika Xavy',
+          text: "Information has been received, we're working on the resolution",
+        },
+      ],
+    };
+    const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('multiple field evaluations', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: 'note[?(@.id<4&&@.author=="Mr Redfin Tekram")]',
+      },
+    ];
+    const expected = {
+      id: '3180',
+      href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      note: [
+        {
+          id: '3',
+          date: '2018-05-02T00:00',
+          author: 'Mr Redfin Tekram',
+          text: 'Issue has been resolved, the service has been restored',
+        },
+      ],
+    };
+    const result = JSONPathQuery.query(simpleDocument, query);
+    expect(result).to.eql(expected);
+  });
+
+  test('multiple field evaluations', () => {
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: '..note[?(@.id>3&& @.author=="Mr Redfin Tekram")]^^',
+      },
+    ];
+    const expected = [
+      {
+        id: '3180',
+        href: 'https://host:port/troubleTicket/v2/troubleTicket/3180',
+      },
+      arrayDocument[1],
+    ];
+    const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
 });
@@ -501,7 +595,7 @@ suite('TM Forum Examples - Filter + Fields + Sort', () => {
       },
       {
         op: 'fields',
-        path: "$[*]['id','text','author']",
+        path: '[*][id,text,author]',
       },
       {
         op: 'sort',
@@ -538,7 +632,7 @@ suite('TM Forum Examples - Filter + Fields + Sort', () => {
       },
       {
         op: 'fields',
-        path: "$[*]['id','text']",
+        path: '[*][id,text]',
       },
       {
         op: 'sort',
@@ -606,9 +700,9 @@ suite('Test jsonpath expression validation', () => {
     expect(valid).to.eql(true);
   });
 
-  test('Invalid jsonpath string - id,href (e.g fields query)', () => {
+  test('jsonpath string validity - id,href (e.g fields query)', () => {
     const jsonpathExpression = 'id,href';
     const valid = checkValidJsonPath(jsonpathExpression);
-    expect(valid).to.eql(false);
+    expect(valid).to.eql(true);
   });
 });

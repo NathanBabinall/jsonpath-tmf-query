@@ -1,6 +1,8 @@
+/* eslint-disable no-shadow */
+/* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-case-declarations */
-import jp from 'jsonpath';
+import { JSONPath } from 'jsonpath-plus';
 import get from 'lodash.get';
 import set from 'lodash.set';
 
@@ -18,19 +20,20 @@ export interface FieldsOperation extends BaseOperation {
 
 export interface SortOperation extends BaseOperation {
   op: 'sort';
-  order: 'asc' | 'desc'
+  order: 'asc' | 'desc';
 }
 
 export type Operation = FilterOperation | FieldsOperation | SortOperation;
 
-const sortOperations = (ops: Operation[]):Operation[] => ops.sort((opA, opB) => {
-  const operationOrder = ['sort', 'filter', 'fields'];
-  function getOpIndex(operation: Operation) {
-    return operationOrder.indexOf(operation.op);
-  }
+const sortOperations = (ops: Operation[]): Operation[] =>
+  ops.sort((opA, opB) => {
+    const operationOrder = ['sort', 'filter', 'fields'];
+    function getOpIndex(operation: Operation) {
+      return operationOrder.indexOf(operation.op);
+    }
 
-  return getOpIndex(opA) - getOpIndex(opB);
-});
+    return getOpIndex(opA) - getOpIndex(opB);
+  });
 
 /**
  * Depth first removal of undefined and empty objects
@@ -65,12 +68,20 @@ const removeEmpty = (obj: any) => {
 export const checkValidJsonPath = (jsonpathExpression: any) => {
   if (typeof jsonpathExpression !== 'string') return false;
   try {
-    jp.parse(jsonpathExpression);
-    return true;
+    const query = JSONPath.toPathArray(jsonpathExpression);
+    return !query.some((element) => {
+      if (element === '') {
+        throw new Error();
+      }
+    });
   } catch (_e) {
     try {
-      jp.parse(`$${jsonpathExpression}`);
-      return true;
+      const query = JSONPath.toPathArray(`$${jsonpathExpression}`);
+      return !query.some((element) => {
+        if (element === '') {
+          return true;
+        }
+      });
     } catch (_e) {
       return false;
     }
@@ -104,21 +115,40 @@ export default class JSONPathQuery {
 
     sortedOperations.forEach((operation, index) => {
       hasSort = operations.slice(index).some((remainingOp) => remainingOp.op === 'sort');
-      let paths: jp.PathComponent[][];
+      let paths;
       if (operation.path.startsWith('$') === false && operation.path !== 'none') {
         if (rootIsArray) operation.path = `$${operation.path}`;
         else operation.path = `$.${operation.path}`;
       }
-      if (hasSort) paths = jp.paths(mutatedDocument, operation.path);
-      else if (hasFilter) paths = jp.paths(filteredDocument, operation.path);
-      else paths = jp.paths(mutatedDocument, operation.path);
+      if (hasSort) {
+        paths = JSONPath({
+          path: operation.path,
+          json: mutatedDocument,
+          resultType: 'path',
+        });
+      } else if (hasFilter) {
+        paths = JSONPath({
+          path: operation.path,
+          json: filteredDocument,
+          resultType: 'path',
+        });
+      } else {
+        paths = JSONPath({
+          path: operation.path,
+          json: mutatedDocument,
+          resultType: 'path',
+        });
+      }
       switch (operation.op) {
         case 'filter':
-          filteredDocument = jp.query(mutatedDocument, operation.path);
+          filteredDocument = JSONPath({
+            path: operation.path,
+            json: mutatedDocument,
+          });
           if (operation.limit && operation.offset) {
             filteredDocument = (filteredDocument as any[]).slice(operation.offset, operation.offset + operation.limit);
           } else if (operation.limit) {
-            filteredDocument = (filteredDocument as any[]).slice(0, (operation.limit));
+            filteredDocument = (filteredDocument as any[]).slice(0, operation.limit);
           } else if (operation.offset) {
             filteredDocument = (filteredDocument as any[]).slice(operation.offset);
           }
@@ -126,32 +156,43 @@ export default class JSONPathQuery {
           break;
         case 'fields':
           if (hasFilter) {
-            paths.forEach((_path) => {
-              const path = _path.filter((p) => p !== '$');
+            paths.forEach((_path: string) => {
+              const path = JSONPath.toPathArray(_path).filter((p) => p !== '$');
               const element = get(filteredDocument, path);
               set(newDocument, path, element);
             });
           } else {
-            paths.forEach((_path) => {
-              const path = _path.filter((p) => p !== '$');
+            paths.forEach((_path: string) => {
+              const path = JSONPath.toPathArray(_path).filter((p) => p !== '$');
               const element = get(mutatedDocument, path);
               set(newDocument, path, element);
             });
           }
           break;
         case 'sort':
-          let jsonPathQuery = jp.parse(operation.path);
-          const sortParam = jsonPathQuery[jsonPathQuery.length - 1].expression.value;
+          let jsonPathQuery = JSONPath.toPathArray(operation.path);
+          const sortParam = jsonPathQuery[jsonPathQuery.length - 1];
           jsonPathQuery = jsonPathQuery.slice(0, -2);
-          const stringPath = jp.stringify(jsonPathQuery);
-          const arrayOfNodes = jp.nodes(mutatedDocument, stringPath);
-          arrayOfNodes[0].value.sort((valueA: any, valueB: any) => {
+          const stringPath = JSONPath.toPathString(jsonPathQuery);
+          const arrayOfNodes = JSONPath({
+            path: stringPath,
+            json: mutatedDocument,
+          });
+          arrayOfNodes[0].sort((valueA: any, valueB: any) => {
             if (operation.order === 'asc') {
-              if (valueA[`${sortParam}`] < valueB[`${sortParam}`]) { return -1; }
-              if (valueA[`${sortParam}`] > valueB[`${sortParam}`]) { return 1; }
+              if (valueA[`${sortParam}`] < valueB[`${sortParam}`]) {
+                return -1;
+              }
+              if (valueA[`${sortParam}`] > valueB[`${sortParam}`]) {
+                return 1;
+              }
             } else {
-              if (valueB[`${sortParam}`] < valueA[`${sortParam}`]) { return -1; }
-              if (valueB[`${sortParam}`] > valueA[`${sortParam}`]) { return 1; }
+              if (valueB[`${sortParam}`] < valueA[`${sortParam}`]) {
+                return -1;
+              }
+              if (valueB[`${sortParam}`] > valueA[`${sortParam}`]) {
+                return 1;
+              }
             }
             return 0;
           });
@@ -160,7 +201,9 @@ export default class JSONPathQuery {
           break;
       }
     });
-    if (hasSort && hasFields === false && hasFilter === false) return mutatedDocument;
+    if (hasSort && hasFields === false && hasFilter === false) {
+      return mutatedDocument;
+    }
     removeEmpty(newDocument);
     return newDocument;
   }
