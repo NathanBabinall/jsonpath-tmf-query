@@ -5,25 +5,15 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  extends: [
-    'airbnb-base',
-  ],
+  extends: ['airbnb-base'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 13,
   },
-  plugins: [
-    '@typescript-eslint',
-  ],
+  plugins: ['@typescript-eslint'],
   rules: {
-    'import/no-extraneous-dependencies': [
-      'error',
-      { devDependencies: ['**/*.test.ts'] },
-    ],
-    'import/extensions': [
-      'error',
-      { ts: 'never', js: 'never' },
-    ],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.ts'] }],
+    'import/extensions': ['error', { ts: 'never', js: 'never' }],
   },
   settings: {
     'import/resolver': {
