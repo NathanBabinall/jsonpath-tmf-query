@@ -488,6 +488,20 @@ suite('TM Forum Examples - Filter', () => {
     expect(result).to.eql(expected);
   });
 
+  test('Filter notes - use a nested filter expression to get the troubleTicket with a specific relatedEntity', () => {
+    const query: Operation[] = [
+      {
+        op: 'filter',
+        path: '$[?(@.relatedEntity[?(@.id==3474)])]',
+      },
+    ];
+    const expected = [
+      arrayDocument[1],
+    ];
+    const result = JSONPathQuery.query(arrayDocument, query);
+    expect(result).to.eql(expected);
+  });
+
   test('Filter notes - includes limit', () => {
     const query: Operation[] = [
       {
