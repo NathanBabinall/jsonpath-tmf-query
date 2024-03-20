@@ -1,7 +1,8 @@
-import { suite, test } from 'mocha';
 import { expect } from 'chai';
-import JSONPathQuery, { Operation, checkValidJsonPath } from '../JSONPathQuery';
-import { simpleDocument, arrayDocument } from './fixture';
+import { suite, test } from 'mocha';
+
+import JSONPathQuery, { checkValidJsonPath, Operation } from '../JSONPathQuery';
+import { arrayDocument, simpleDocument } from './fixture';
 
 suite('TM Forum Examples - Fields', () => {
   test('Return channel name + root id and href', () => {
@@ -495,9 +496,7 @@ suite('TM Forum Examples - Filter', () => {
         path: '$[?(@.relatedEntity[?(@.id==3474)])]',
       },
     ];
-    const expected = [
-      arrayDocument[1],
-    ];
+    const expected = [arrayDocument[1]];
     const result = JSONPathQuery.query(arrayDocument, query);
     expect(result).to.eql(expected);
   });
@@ -718,5 +717,26 @@ suite('Test jsonpath expression validation', () => {
     const jsonpathExpression = 'id,href';
     const valid = checkValidJsonPath(jsonpathExpression);
     expect(valid).to.eql(true);
+  });
+});
+
+suite('Documents containing null/undefined values', () => {
+  test('remove empty objects', () => {
+    const document = {
+      foo: 'foo',
+      bar: undefined,
+      baz: null,
+    };
+    const query: Operation[] = [
+      {
+        op: 'fields',
+        path: 'foo,bar,baz',
+      },
+    ];
+    const expected = {
+      foo: 'foo',
+    };
+    const result = JSONPathQuery.query(document, query);
+    expect(result).to.eql(expected);
   });
 });
