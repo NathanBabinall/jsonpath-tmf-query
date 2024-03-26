@@ -40,10 +40,12 @@ const sortOperations = (ops: Operation[]): Operation[] =>
  */
 const removeEmpty = (obj: any) => {
   Object.keys(obj).forEach((key) => {
-    // Get this value and its type
+    // Get this value
     const value = obj[key];
-    const type = typeof value;
-    if (type === 'object') {
+    if (value == null) {
+      // Remove null/undefined values
+      delete obj[key];
+    } else if (typeof value === 'object') {
       // Recurse
       removeEmpty(value);
       // If it's an object without keys, delete
@@ -58,9 +60,6 @@ const removeEmpty = (obj: any) => {
           }
         }
       }
-    } else if (type === 'undefined') {
-      // Undefined, remove it
-      delete obj[key];
     }
   });
 };
