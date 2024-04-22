@@ -2,11 +2,22 @@
   "name": "jsonpath-tmf-query",
   "version": "1.1.2",
   "description": "This library aims to provide a simple wrapper around jsonpath, to ease the implementation of TMF630 JSONPath specification as outlined by the TM Forum [here](https://projects.tmforum.org/wiki/pages/viewpage.action?spaceKey=PUB&title=TMF630+REST+API+Design+Guidelines+v4.0.1)",
-  "main": "dist/JSONPathQuery.js",
+  "type": "module",
+  "main": "./dist/JSONPathQuery.cjs",
+  "module": "./dist/JSONPathQuery.mjs",
+  "types": "./dist/JSONPathQuery.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/JSONPathQuery.cjs",
+      "import": "./dist/JSONPathQuery.mjs",
+      "types": "./dist/JSONPathQuery.d.ts"
+    }
+  },
   "scripts": {
-    "prepublish": "tsc",
+    "prepack": "unbuild",
     "build": "tsc",
-    "test": "mocha"
+    "test": "vitest run",
+    "lint": "eslint src"
   },
   "files": [
     "dist/*"
@@ -14,22 +25,17 @@
   "author": "Nathan Babinall",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^9.1.1",
     "@semantic-release/git": "^10.0.1",
-    "@types/chai": "^4.2.22",
-    "@types/jsonpath": "^0.2.0",
     "@types/lodash": "^4.14.202",
-    "@types/mocha": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "chai": "^4.3.4",
-    "eslint": "^8.2.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.25.3",
-    "mocha": "^9.1.3",
-    "mocha-clean": "^1.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "semantic-release": "^23.0.0",
     "source-map-support": "^0.5.20",
-    "ts-node": "^10.4.0"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.7.0",
+    "unbuild": "^2.0.0",
+    "vitest": "^1.5.0"
   },
   "dependencies": {
     "jsonpath-plus": "^8.0.0",
