@@ -1,8 +1,7 @@
-import { expect } from 'chai';
-import { suite, test } from 'mocha';
+import { suite, test, expect } from 'vitest';
 
-import JSONPathQuery, { checkValidJsonPath, Operation } from '../JSONPathQuery';
-import { arrayDocument, simpleDocument } from './fixture';
+import JSONPathQuery, { checkValidJsonPath, Operation } from '../JSONPathQuery.js';
+import { arrayDocument, simpleDocument } from './fixture.js';
 
 suite('TM Forum Examples - Fields', () => {
   test('Return channel name + root id and href', () => {

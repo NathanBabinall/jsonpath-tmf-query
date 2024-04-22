@@ -3,8 +3,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-case-declarations */
 import { JSONPath } from 'jsonpath-plus';
-import get from 'lodash/get';
-import set from 'lodash/set';
+import lodash from 'lodash';
+const { get, set } = lodash;
 
 export interface BaseOperation {
   path: string;
@@ -94,8 +94,8 @@ export default class JSONPathQuery {
     const hasFields = operations.some((operation) => operation.op === 'fields');
     const hasFilter = operations.some((operation) => operation.op === 'filter');
     let hasSort = operations.some((operation) => operation.op === 'sort');
-    let newDocument: {} | [{}];
-    let filteredDocument: {} | [{}] = rootIsArray ? [] : {};
+    let newDocument: object | [object];
+    let filteredDocument: object | [object] = rootIsArray ? [] : {};
     if (hasFilter || rootIsArray) newDocument = [];
     else newDocument = {};
     const pathPrefix = rootIsArray || hasFilter ? '$[*].' : '$.';
